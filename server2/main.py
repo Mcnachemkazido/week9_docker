@@ -6,17 +6,20 @@ from pydantic import BaseModel
 
 
 DB_PATH= Path("./db/shopping_list.json")
+BACKUP_DATA_PATH = Path('./data/backup_shopping_list.json')
 
-def load_database():
+
+
+def load_database(path):
     try:
-        with open(DB_PATH, "r") as f:
+        with open(path, "r") as f:
             return json.load(f)
     except json.JSONDecodeError:
         raise ValueError("Database file is not valid JSON.")
 
 
-def save_database(data) -> None:
-    with open(DB_PATH, "w") as f:
+def save_database(data,path) -> None:
+    with open(path, "w") as f:
         json.dump(data, f, indent=2)
 
 
@@ -42,18 +45,32 @@ def startup_event():
 
 @app.get("/items/")
 def get_items():
-    return load_database()
+    return load_database(DB_PATH)
 
 
 @app.post("/items/")
 def post_item(item:Item):
-    data = load_database()
+    data = load_database(DB_PATH)
     item_id = len(data) + 1
     item = {"id":item_id,"name":item.name,"quantity":item.quantity}
     data.append(item)
-    save_database(data)
+    save_database(data,DB_PATH)
     print()
     return {"message":"The item has been successfully added"}
+
+
+@app.get("/backup")
+def get_backup():
+    if BACKUP_DATA_PATH.exists():
+        return load_database(BACKUP_DATA_PATH)
+    else:
+        return {"massage":"file not exists"}
+
+@app.post("/backup/save")
+def save_volume_to_backup():
+    backup_data = load_database(DB_PATH)
+    save_database(backup_data,BACKUP_DATA_PATH)
+    return {"massage":"Writing to the local page was successful"}
 
 
 
