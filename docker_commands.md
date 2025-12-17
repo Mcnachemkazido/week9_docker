@@ -36,7 +36,6 @@ docker build -t shopping-server2:v1 .
 ### Run the container
 
 ```bash
-docker run -d -p 8001:8000 --name con-2 -v fastapi-db:/app/db shopping-server2:v1 
 docker run -d -p 8001:8000 --name con-2 --mount type=volume,source=fastapi-db,target=/app/db --mount type=bind,source="%cd%/data",target=/app/data shopping-server2:v1 
 ```
 
